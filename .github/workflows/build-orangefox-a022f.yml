@@ -8,8 +8,8 @@ on:
       - Lineage_18.1
 
 env:
-  MANIFEST: https://github.com/minimal-manifest-twrp/platform_manifest_twrp_omni.git
-  MANIFEST_BRANCH: twrp-10.0-deprecated
+  MANIFEST: https://github.com/nebrassy/platform_manifest_twrp_aosp.git
+  MANIFEST_BRANCH: twrp-14
   DEVICE: a02
   DT_LINK: https://github.com/OrangeFoxRecovery/device_samsung_a02.git
   DT_PATH: device/samsung/a02
