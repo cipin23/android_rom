@@ -15,7 +15,7 @@ env:
   # Optional: kernel repo with prebuilt images
   KERNEL_REPO: "https://github.com/cipin23/A02twrp"
   # Optional: direct URL to a tarball containing zImage/dtb.img/dtbo.img
-  KERNEL_PREBUILT_URL: "https://github.com/cipin23/A02twrp/raw/refs/heads/main/kernel.tar"
+  KERNEL_PREBUILT_URL: "https://github.com/cipin23/A02twrp/raw/refs/heads/main/kernel.tar.gz"
   # Optional: repo that contains vendor blobs or extract script
   VENDOR_BLOBS_REPO: "https://github.com/a02-trial/android_vendor_tree_samsung_a02"
 
