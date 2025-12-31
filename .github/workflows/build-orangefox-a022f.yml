@@ -98,7 +98,7 @@ jobs:
           mka -j$(nproc) $TARGET || true
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: orangefox-${{ env.DEVICE }}-artifacts
           path: work/out/target/product/*/OrangeFox*.zip,work/out/target/product/*/recovery.img
