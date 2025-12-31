@@ -1,0 +1,66 @@
+name: Build OrangeFox (SM-A022F)
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+env:
+  MANIFEST: https://github.com/minimal-manifest-twrp/platform_manifest_twrp_omni.git
+  MANIFEST_BRANCH: twrp-11.0
+  DEVICE: a02
+  DT_LINK: https://github.com/OrangeFoxRecovery/device_samsung_a02.git
+  DT_PATH: device/samsung/a02
+  FOX_BRANCH: fox_12.1
+  TARGET: recoveryimage
+  TZ: UTC
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get -qq update
+          sudo apt-get -qq install -y bc build-essential zip curl git wget python3 gcc clang libssl-dev repo rsync flex bison aria2
+          sudo curl --create-dirs -L -o /usr/local/bin/repo https://storage.googleapis.com/git-repo-downloads/repo
+          sudo chmod a+rx /usr/local/bin/repo
+
+      - name: Sync recovery source and device tree
+        run: |
+          set -e
+          mkdir work
+          cd work
+          repo init -u "$MANIFEST" -b "$MANIFEST_BRANCH" --depth=1 --groups=all,-notdefault,-device,-darwin,-x86,-mips
+          repo sync -j8 --force-sync
+          git clone "$DT_LINK" --depth=1 "$DT_PATH"
+
+          # Replace TWRP with OrangeFox sources for Fox branch
+          rm -rf bootable/recovery vendor/recovery || true
+          git clone https://gitlab.com/OrangeFox/bootable/Recovery.git -b "$FOX_BRANCH" bootable/recovery || true
+          git clone https://gitlab.com/OrangeFox/vendor/recovery.git -b "$FOX_BRANCH" vendor/recovery || true
+
+      - name: Build OrangeFox recovery
+        env:
+          ALLOW_MISSING_DEPENDENCIES: true
+        run: |
+          set -e
+          cd work
+          . build/envsetup.sh
+          lunch omni_$DEVICE-eng
+          mka -j$(nproc) $TARGET || true
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: orangefox-${{ env.DEVICE }}-artifacts
+          path: work/out/target/product/*/OrangeFox*.zip,work/out/target/product/*/recovery.img
+
+      - name: Success notice
+        if: ${{ always() }}
+        run: |
+          echo "Workflow finished. Artifacts (if built) are uploaded to the Actions run." 
