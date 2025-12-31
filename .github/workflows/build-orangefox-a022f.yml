@@ -8,8 +8,8 @@ on:
       - Lineage_18.1
 
 env:
-  MANIFEST: https://github.com/nebrassy/platform_manifest_twrp_aosp.git
-  MANIFEST_BRANCH: twrp-14
+  MANIFEST: https://github.com/minimal-manifest-twrp/platform_manifest_twrp_aosp.git
+  MANIFEST_BRANCH: twrp-11
   DEVICE: a02
   DT_LINK: https://github.com/OrangeFoxRecovery/device_samsung_a02.git
   DT_PATH: device/samsung/a02
@@ -17,11 +17,11 @@ env:
   TARGET: recoveryimage
   TZ: UTC
   # Optional: kernel repo with prebuilt images
-  KERNEL_REPO: "https://github.com/cipin23/SM-A022F_SEA_RR_Opensource.git"
+  KERNEL_REPO: "https://github.com/cipin23/A02twrp"
   # Optional: direct URL to a tarball containing zImage/dtb.img/dtbo.img
-  KERNEL_PREBUILT_URL: ""
+  KERNEL_PREBUILT_URL: "https://github.com/cipin23/A02twrp/raw/refs/heads/main/kernel.tar"
   # Optional: repo that contains vendor blobs or extract script
-  VENDOR_BLOBS_REPO: "https://github.com/pachdomenic/twrp_device_samsung_a02.git"
+  VENDOR_BLOBS_REPO: "https://github.com/a02-trial/android_vendor_tree_samsung_a02"
 
 jobs:
   build:
