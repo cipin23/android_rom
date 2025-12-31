@@ -2,10 +2,6 @@ name: Build OrangeFox (SM-A022F)
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - main
-      - Lineage_18.1
 
 env:
   MANIFEST: https://github.com/minimal-manifest-twrp/platform_manifest_twrp_aosp.git
@@ -29,6 +25,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Cleanup
+        uses: rokibhasansagar/slimhub_actions@main
 
       - name: Install dependencies
         run: |
