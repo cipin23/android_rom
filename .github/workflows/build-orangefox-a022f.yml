@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - main
+      - Lineage_18.1
 
 env:
   MANIFEST: https://github.com/minimal-manifest-twrp/platform_manifest_twrp_omni.git
@@ -16,11 +17,11 @@ env:
   TARGET: recoveryimage
   TZ: UTC
   # Optional: kernel repo with prebuilt images
-  KERNEL_REPO: ""
+  KERNEL_REPO: "https://github.com/cipin23/SM-A022F_SEA_RR_Opensource.git"
   # Optional: direct URL to a tarball containing zImage/dtb.img/dtbo.img
   KERNEL_PREBUILT_URL: ""
   # Optional: repo that contains vendor blobs or extract script
-  VENDOR_BLOBS_REPO: ""
+  VENDOR_BLOBS_REPO: "https://github.com/pachdomenic/twrp_device_samsung_a02.git"
 
 jobs:
   build:
