@@ -15,6 +15,12 @@ env:
   FOX_BRANCH: fox_12.1
   TARGET: recoveryimage
   TZ: UTC
+  # Optional: kernel repo with prebuilt images
+  KERNEL_REPO: ""
+  # Optional: direct URL to a tarball containing zImage/dtb.img/dtbo.img
+  KERNEL_PREBUILT_URL: ""
+  # Optional: repo that contains vendor blobs or extract script
+  VENDOR_BLOBS_REPO: ""
 
 jobs:
   build:
@@ -30,7 +36,7 @@ jobs:
           sudo curl --create-dirs -L -o /usr/local/bin/repo https://storage.googleapis.com/git-repo-downloads/repo
           sudo chmod a+rx /usr/local/bin/repo
 
-      - name: Sync recovery source and device tree
+      - name: Sync recovery source and device tree (with optional blobs)
         run: |
           set -e
           mkdir work
@@ -38,6 +44,42 @@ jobs:
           repo init -u "$MANIFEST" -b "$MANIFEST_BRANCH" --depth=1 --groups=all,-notdefault,-device,-darwin,-x86,-mips
           repo sync -j8 --force-sync
           git clone "$DT_LINK" --depth=1 "$DT_PATH"
+
+          # Optional: fetch a kernel repo that contains prebuilt zImage/dtb/dtbo
+          if [ -n "${KERNEL_REPO:-}" ]; then
+            echo "Fetching kernel repo from $KERNEL_REPO"
+            git clone --depth=1 "$KERNEL_REPO" work/kernel_repo || true
+            # Try copying common prebuilt names into device prebuilt/ if present
+            mkdir -p "$DT_PATH"/prebuilt
+            cp work/kernel_repo/prebuilt/zImage "$DT_PATH"/prebuilt/zImage 2>/dev/null || true
+            cp work/kernel_repo/prebuilt/dtb.img "$DT_PATH"/prebuilt/dtb.img 2>/dev/null || true
+            cp work/kernel_repo/prebuilt/dtbo.img "$DT_PATH"/prebuilt/dtbo.img 2>/dev/null || true
+          fi
+
+          # Optional: download a tarball or archive with prebuilts
+          if [ -n "${KERNEL_PREBUILT_URL:-}" ]; then
+            echo "Downloading kernel prebuilts from $KERNEL_PREBUILT_URL"
+            wget -q -O kernel_prebuilts.tar.gz "$KERNEL_PREBUILT_URL" || true
+            mkdir -p tmp_preb
+            tar -xzf kernel_prebuilts.tar.gz -C tmp_preb || true
+            mkdir -p "$DT_PATH"/prebuilt
+            cp tmp_preb/zImage "$DT_PATH"/prebuilt/ 2>/dev/null || true
+            cp tmp_preb/dtb.img "$DT_PATH"/prebuilt/ 2>/dev/null || true
+            cp tmp_preb/dtbo.img "$DT_PATH"/prebuilt/ 2>/dev/null || true
+          fi
+
+          # Optional: fetch vendor blobs or prebuilt vendor images
+          if [ -n "${VENDOR_BLOBS_REPO:-}" ]; then
+            echo "Fetching vendor blobs from $VENDOR_BLOBS_REPO"
+            git clone --depth=1 "$VENDOR_BLOBS_REPO" work/vendor_blobs || true
+            # If repo contains a script to extract files (e.g. extract-files.sh), run it
+            if [ -x work/vendor_blobs/extract-files.sh ]; then
+              (cd work/vendor_blobs && ./extract-files.sh) || true
+            else
+              # Try copying vendor directories into work/vendor
+              cp -r work/vendor_blobs/vendor/* vendor/ 2>/dev/null || true
+            fi
+          fi
 
           # Replace TWRP with OrangeFox sources for Fox branch
           rm -rf bootable/recovery vendor/recovery || true
